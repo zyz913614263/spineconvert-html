@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN" class="dark" data-theme="slate-canvas">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0f14" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="application-name" content="Spine Thing" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="license" href="/LICENSE.txt" />
+    <link rel="canonical" href="__SITE_URL__" />
+    <meta
+      name="description"
+      content="Inspect, preview, and convert Spine 3.3–4.2 JSON and SKEL animations, then export PNG, GIF, WebM, or MP4 directly in your browser."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Spine Thing" />
+    <meta property="og:title" content="Spine Thing — Browser Spine Viewer, Converter & Exporter" />
+    <meta
+      property="og:description"
+      content="Preview and convert Spine JSON and SKEL animations from versions 3.3 through 4.2, then export images and video in your browser."
+    />
+    <meta property="og:url" content="__SITE_URL__" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Spine Thing — Browser Spine Viewer, Converter & Exporter" />
+    <meta
+      name="twitter:description"
+      content="Preview, convert, and export Spine animations directly in your browser."
+    />
+    <title>Spine Thing — Browser Spine Viewer, Converter &amp; Exporter</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Spine Thing",
+        "url": "__SITE_URL__",
+        "description": "A browser-based Spine animation viewer, JSON and SKEL converter, and media exporter for Spine 3.3 through 4.2.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript and WebGL",
+        "isAccessibleForFree": true
+      }
+    </script>
+    <style>
+      .app-fallback {
+        box-sizing: border-box;
+        display: grid;
+        min-height: 100vh;
+        place-items: center;
+        padding: 2rem;
+        background: #0b0f14;
+        color: #e6edf3;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+
+      .app-fallback__content {
+        max-width: 46rem;
+      }
+
+      .app-fallback h1 {
+        margin: 0 0 1rem;
+        font-size: clamp(2rem, 6vw, 4rem);
+      }
+
+      .app-fallback p {
+        color: #aeb8c4;
+        line-height: 1.65;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <main class="app-fallback">
+        <div class="app-fallback__content">
+          <h1>Spine Thing</h1>
+          <p>
+            Inspect and preview Spine animations, convert JSON and SKEL skeletons between Spine 3.3
+            and 4.2, and export frames, GIF, WebM, or MP4 without uploading local assets.
+          </p>
+          <p>Loading the browser-based Spine viewer and converter…</p>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

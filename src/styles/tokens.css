@@ -1,0 +1,394 @@
+/*
+ * Slate Canvas design tokens.
+ * shadcn/ui so generated Base UI components inherit the product identity.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Base colors */
+  --slate-workspace: #0b0f14;
+  --slate-canvas: #07090c;
+  --slate-surface: #111720;
+  --slate-surface-raised: #18212c;
+  --slate-surface-hover: #1d2835;
+  --slate-border: #2b3948;
+  --slate-border-soft: #202b36;
+  --slate-text: #f4f7fb;
+  --slate-white: #ffffff;
+  --slate-text-muted: #a9b4c2;
+  --slate-blue: #2f6feb;
+  --slate-blue-hover: #437ff0;
+  --slate-blue-soft: #152b4f;
+  --slate-cyan: #39c5d8;
+  --slate-success: #38c172;
+  --slate-warning: #d5a021;
+  --slate-danger: #df5965;
+  --slate-focus: #79b8ff;
+  --slate-scrim: #05080db8;
+  --slate-success-ring: #38c1721f;
+  --slate-hud: #0b0f14db;
+  --slate-primary-wash: #2f6feb33;
+
+  /* Product color aliases */
+  --workspace: var(--slate-workspace);
+  --canvas: var(--slate-canvas);
+  --surface: var(--slate-surface);
+  --surface-raised: var(--slate-surface-raised);
+  --surface-hover: var(--slate-surface-hover);
+  --border-soft: var(--slate-border-soft);
+  --primary-hover: var(--slate-blue-hover);
+  --primary-soft: var(--slate-blue-soft);
+  --cyan: var(--slate-cyan);
+  --success: var(--slate-success);
+  --warning: var(--slate-warning);
+  --focus: var(--slate-focus);
+  --scrim: var(--slate-scrim);
+  --success-ring: var(--slate-success-ring);
+  --hud-background: var(--slate-hud);
+  --primary-wash: var(--slate-primary-wash);
+
+  /* shadcn color variables */
+  --background: var(--slate-workspace);
+  --foreground: var(--slate-text);
+  --card: var(--slate-surface);
+  --card-foreground: var(--slate-text);
+  --popover: var(--slate-surface-raised);
+  --popover-foreground: var(--slate-text);
+  --primary: var(--slate-blue);
+  --primary-foreground: var(--slate-white);
+  --secondary: var(--slate-surface-raised);
+  --secondary-foreground: var(--slate-text);
+  --muted: var(--slate-surface-raised);
+  --muted-foreground: var(--slate-text-muted);
+  --accent: var(--slate-surface-hover);
+  --accent-foreground: var(--slate-text);
+  --destructive: var(--slate-danger);
+  --destructive-foreground: var(--slate-canvas);
+  --border: var(--slate-border);
+  --input: var(--slate-border);
+  --ring: var(--slate-focus);
+  --chart-1: var(--slate-blue);
+  --chart-2: var(--slate-cyan);
+  --chart-3: var(--slate-success);
+  --chart-4: var(--slate-warning);
+  --chart-5: var(--slate-danger);
+  --sidebar: var(--slate-surface);
+  --sidebar-foreground: var(--slate-text);
+  --sidebar-primary: var(--slate-blue);
+  --sidebar-primary-foreground: var(--slate-white);
+  --sidebar-accent: var(--slate-surface-raised);
+  --sidebar-accent-foreground: var(--slate-text);
+  --sidebar-border: var(--slate-border-soft);
+  --sidebar-ring: var(--slate-focus);
+
+  /* Type */
+  --font-ui:
+    "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --font-data:
+    "JetBrains Mono Variable", "JetBrains Mono", "Cascadia Mono", "SFMono-Regular", Consolas,
+    monospace;
+  --font-size-2xs: 0.6875rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-base: 0.875rem;
+  --font-size-lg: 1rem;
+  --font-size-xl: 1.125rem;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --line-height-tight: 1.1;
+  --line-height-ui: 1.35;
+  --line-height-body: 1.55;
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-data: 0.04em;
+
+  /* Spacing and editor sizes */
+  --space-unit: 0.25rem;
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --size-px: 0.0625rem;
+  --size-control: 2.25rem;
+  --size-control-sm: 1.875rem;
+  --size-icon: 1rem;
+  --size-icon-lg: 1.25rem;
+  --size-header: 3.5rem;
+  --size-status: 1.75rem;
+  --size-sidebar-left: 17rem;
+  --size-sidebar-right: 18rem;
+  --size-timeline: 5.75rem;
+  --size-mobile: 20rem;
+  --size-drawer: 22rem;
+  --size-export-task: 22rem;
+  --size-command: 34rem;
+  --size-picker-row: 1.75rem;
+  --size-picker-list: 17.5rem;
+  /* Row pitch, gap included, so a windowed list can position rows arithmetically. */
+  --size-gallery-row: 4.625rem;
+  --size-gallery-gap: 0.25rem;
+  --size-workspace-breakpoint: 75rem;
+  --size-slider-track: 0.25rem;
+  --size-slider-thumb: 0.75rem;
+  --size-touch-target: 2.75rem;
+  --size-switch-track: 1.15rem;
+  --size-switch-width: 2rem;
+  --size-switch-track-sm: 0.875rem;
+  --size-switch-width-sm: 1.5rem;
+  --size-drawer-gap: 6rem;
+  --size-drawer-narrow: 75%;
+  --size-drawer-wide: 24rem;
+  --size-drawer-bleed: 3rem;
+  --size-drawer-peek: 1rem;
+
+  /* Shape */
+  --radius: 0.625rem;
+  --radius-control: 0.375rem;
+  --radius-surface: 0.625rem;
+  --radius-overlay: 0.875rem;
+  --radius-pill: 999rem;
+
+  /* Shadows */
+  --elevation-xs: 0 0.0625rem 0.125rem #00000033;
+  --elevation-sm: 0 0.25rem 0.75rem #00000038;
+  --elevation-md: 0 0.75rem 2rem #0000004d;
+  --elevation-popover: 0 1.5rem 4rem #00000066;
+
+  /* Motion */
+  --duration-instant: 90ms;
+  --duration-fast: 140ms;
+  --duration-medium: 220ms;
+  --duration-drawer-content: 300ms;
+  --duration-drawer-exit: 400ms;
+  --duration-drawer: 450ms;
+  --duration-spinner: 800ms;
+  --duration-spinner-reduced: 1600ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-drawer: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-drawer-backdrop: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-drawer-content: cubic-bezier(0.45, 1.005, 0, 1.005);
+  --opacity-drawer-backdrop: 0.5;
+  --opacity-drawer-exit: 0.9999;
+  --drawer-stack-step: 0.05;
+}
+
+@theme inline {
+  /* Fonts */
+  --font-sans: var(--font-ui);
+  --font-heading: var(--font-ui);
+  --font-mono: var(--font-data);
+  --text-2xs: var(--font-size-2xs);
+  --text-xs: var(--font-size-xs);
+  --text-sm: var(--font-size-sm);
+  --text-base: var(--font-size-base);
+  --text-lg: var(--font-size-lg);
+  --text-xl: var(--font-size-xl);
+  --text-2xs--line-height: var(--line-height-ui);
+  --text-xs--line-height: var(--line-height-ui);
+  --text-sm--line-height: var(--line-height-ui);
+  --text-base--line-height: var(--line-height-body);
+  --text-lg--line-height: var(--line-height-ui);
+  --text-xl--line-height: var(--line-height-tight);
+  --font-weight-normal: var(--weight-regular);
+  --font-weight-medium: var(--weight-medium);
+  --font-weight-semibold: var(--weight-semibold);
+  --font-weight-bold: var(--weight-bold);
+  --leading-tight: var(--line-height-tight);
+  --leading-ui: var(--line-height-ui);
+  --leading-body: var(--line-height-body);
+
+  /* Tailwind spacing namespace */
+  --spacing: var(--space-unit);
+  --spacing-control: var(--size-control);
+  --spacing-control-sm: var(--size-control-sm);
+  --spacing-icon: var(--size-icon);
+  --spacing-icon-lg: var(--size-icon-lg);
+  --spacing-app-header: var(--size-header);
+  --spacing-status: var(--size-status);
+  --spacing-sidebar-left: var(--size-sidebar-left);
+  --spacing-sidebar-right: var(--size-sidebar-right);
+  --spacing-timeline: var(--size-timeline);
+  --spacing-mobile: var(--size-mobile);
+  --spacing-drawer: var(--size-drawer);
+  --spacing-export-task: var(--size-export-task);
+  --spacing-picker-row: var(--size-picker-row);
+  --spacing-picker-list: var(--size-picker-list);
+  --spacing-gallery-row: var(--size-gallery-row);
+  --spacing-gallery-gap: var(--size-gallery-gap);
+  --spacing-slider-track: var(--size-slider-track);
+  --spacing-slider-thumb: var(--size-slider-thumb);
+  --spacing-touch-target: var(--size-touch-target);
+
+  /* Breakpoints and containers */
+  --breakpoint-compact: 30rem;
+  --breakpoint-medium: 48rem;
+  --breakpoint-wide: 64rem;
+  /* Media-query syntax cannot consume var(); keep this paired with the root token above. */
+  --breakpoint-workspace: 75rem;
+  --container-command: var(--size-command);
+
+  /* Letter spacing */
+  --tracking-tight: var(--letter-spacing-tight);
+  --tracking-data: var(--letter-spacing-data);
+
+  /*
+   * Set Tailwind's motion defaults from the project tokens.
+   */
+  --default-transition-duration: var(--duration-fast);
+  --default-transition-timing-function: var(--ease-out-expo);
+  --ease-expo: var(--ease-out-expo);
+  --ease-quart: var(--ease-out-quart);
+
+  /* Tailwind radius namespace. base-nova buttons use rounded-lg. */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.3125rem;
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-control);
+  --radius-xl: var(--radius-surface);
+  --radius-2xl: var(--radius-overlay);
+  --radius-3xl: 1.25rem;
+  --radius-4xl: 1.5rem;
+
+  /* Tailwind elevation namespace */
+  --shadow-2xs: var(--elevation-xs);
+  --shadow-xs: var(--elevation-xs);
+  --shadow-sm: var(--elevation-sm);
+  --shadow-md: var(--elevation-md);
+  --shadow-lg: var(--elevation-popover);
+  --shadow-popover: var(--elevation-popover);
+
+  /* shadcn semantic utilities */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Slate Canvas product utilities */
+  --color-workspace: var(--workspace);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-hover: var(--surface-hover);
+  --color-border-soft: var(--border-soft);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-cyan: var(--cyan);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-focus: var(--focus);
+  --color-scrim: var(--scrim);
+  --color-hud: var(--hud-background);
+  --color-primary-wash: var(--primary-wash);
+}
+
+/*
+ * Named motion durations. Tailwind has no duration theme namespace, so the
+ * scale is published as utilities; setting `--tw-duration` also drives the
+ * enter/exit keyframes that tw-animate-css generates.
+ */
+@utility duration-instant {
+  --tw-duration: var(--duration-instant);
+  transition-duration: var(--duration-instant);
+}
+
+@utility duration-fast {
+  --tw-duration: var(--duration-fast);
+  transition-duration: var(--duration-fast);
+}
+
+@utility duration-medium {
+  --tw-duration: var(--duration-medium);
+  transition-duration: var(--duration-medium);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    min-width: var(--size-mobile);
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-ui);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    min-height: 100dvh;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: calc(var(--size-px) * 2) solid var(--focus);
+    outline-offset: calc(var(--size-px) * 2);
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  * {
+    scrollbar-color: var(--border) transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: var(--duration-instant) !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--duration-instant) !important;
+  }
+
+  /* Loading remains perceivable while reducing its visual intensity. */
+  [data-slot="spinner"] {
+    animation-duration: var(--duration-spinner-reduced) !important;
+    animation-iteration-count: infinite !important;
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "readme": "Built-in gallery libraries. Add one by appending an entry below; `id` must be unique and stable, and `manifestUrl` must be an https URL the browser can reach with permissive CORS. Optional `defaults.premultipliedAlpha` applies when neither the remote manifest nor an item declares an alpha mode. Entries are validated by src/domain/gallery/sources.ts and covered by its test, so a malformed entry fails CI rather than the app. A manifest must use the v1 schema.",
+  "sources": [
+    {
+      "id": "langrisser",
+      "label": "Langrisser",
+      "description": "Langrisser character, NPC, and confession rigs.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/langrisser/catalog.json",
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/langrisser"
+      }
+    },
+    {
+      "id": "ark-models",
+      "label": "Arknights",
+      "description": "Arknights Spine model catalog.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/ark-models/catalog.json",
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/ark-models"
+      }
+    },
+    {
+      "id": "bd2-l2d-viewer",
+      "label": "Brown Dust 2",
+      "description": "Brown Dust 2 Spine model catalog.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/bd2-l2d-viewer/catalog.json",
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/bd2-l2d-viewer"
+      }
+    },
+    {
+      "id": "blue-archive-viewer",
+      "label": "Blue Archive",
+      "description": "Blue Archive Spine model catalog.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/blue-archive-viewer/catalog.json",
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/blue-archive-viewer"
+      }
+    },
+    {
+      "id": "nikke-db",
+      "label": "NIKKE",
+      "description": "NIKKE Spine animation catalog.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/nikke-db/catalog.json",
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/nikke-db"
+      }
+    },
+    {
+      "id": "konosuba-fantastic-days",
+      "label": "KonoSuba: Fantastic Days",
+      "description": "Deduplicated ally, assist, and enemy battle animations.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/konosuba-fantastic-days/catalog.json",
+      "defaults": {
+        "premultipliedAlpha": "premultiplied"
+      },
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/konosuba-fantastic-days"
+      }
+    },
+    {
+      "id": "counterside",
+      "label": "CounterSide",
+      "description": "Character illustrations, battle animations, cut-ins, and story scenes.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/counterside/catalog.json",
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/counterside"
+      }
+    },
+    {
+      "id": "epic-seven",
+      "label": "Epic Seven",
+      "description": "Epic Seven heroes, NPCs, monsters, and related Spine models.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/epic-seven/catalog.json",
+      "defaults": {
+        "premultipliedAlpha": "premultiplied"
+      },
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/epic-seven"
+      }
+    },
+    {
+      "id": "daiblos-core",
+      "label": "Daiblos Core",
+      "description": "Primary character and CG rigs without standalone effect layers.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/daiblos-core/catalog.json",
+      "defaults": {
+        "premultipliedAlpha": "premultiplied"
+      },
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/daiblos-core"
+      }
+    },
+    {
+      "id": "shadowverse",
+      "label": "Shadowverse",
+      "description": "Available classic Shadowverse animated leaders.",
+      "manifestUrl": "https://raw.githubusercontent.com/cambacodes/spine-catalog/main/catalogs/shadowverse/catalog.json",
+      "attribution": {
+        "label": "cambacodes/spine-catalog",
+        "url": "https://github.com/cambacodes/spine-catalog/tree/main/catalogs/shadowverse"
+      }
+    }
+  ]
+}

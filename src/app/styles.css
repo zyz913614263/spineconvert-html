@@ -1,0 +1,82 @@
+/* Native controls and animations that require runtime CSS variables. */
+
+[data-slot="collapsible-content"] {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+  transition: grid-template-rows var(--duration-medium) var(--ease-out-expo);
+}
+
+[data-slot="collapsible-content"][hidden]:not([hidden="until-found"]) {
+  display: none;
+}
+
+[data-slot="collapsible-content"][data-starting-style],
+[data-slot="collapsible-content"][data-ending-style] {
+  grid-template-rows: minmax(0, 0fr);
+}
+
+[data-slot="collapsible-content"] > * {
+  min-height: 0;
+}
+
+input[type="color"] {
+  cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-control) - var(--size-px));
+}
+
+input[type="color"]::-moz-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-control) - var(--size-px));
+}
+
+[data-slot="drawer-overlay"],
+[data-slot="dialog-overlay"] {
+  background: var(--scrim);
+}
+
+.export-film-icon {
+  animation: export-film 1.6s var(--ease-out-expo) infinite alternate;
+}
+
+@keyframes export-film {
+  from {
+    transform: translateX(calc(var(--space-1) * -0.5));
+  }
+  to {
+    transform: translateX(calc(var(--space-1) * 0.5));
+  }
+}
+
+@media (pointer: coarse) {
+  [data-slot="button"],
+  [data-slot="combobox-trigger"],
+  [data-slot="select-trigger"],
+  [data-slot="input"],
+  [data-slot="tabs-trigger"],
+  [data-slot="slider-control"],
+  [role="tab"] {
+    min-height: var(--size-touch-target);
+  }
+
+  [data-slot="button"]:has(> svg:only-child),
+  [data-slot="tabs-trigger"],
+  [role="tab"] {
+    min-width: var(--size-touch-target);
+  }
+}
+
+/* Hide hover help on devices where it would cover the next tap. */
+@media (hover: none) {
+  [data-slot="tooltip-content"] {
+    display: none;
+  }
+}
