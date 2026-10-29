@@ -1,129 +1,78 @@
 # Spine Thing
 
-Spine Thing is a browser-based Spine animation viewer, JSON/SKEL converter, and
-media exporter. It reads Spine 3.3 through 4.2 JSON and SKEL files, converts them
-between supported versions and formats, and previews them with the official
-Spine WebGL runtime. Local assets stay on the device. Gallery mode downloads
-read-only bundles from configured servers into the same workspace.
+Spine Thing 是一个跑在浏览器里的 Spine 动画查看器、JSON/SKEL 转换器和媒体导出工具。它读取 Spine 3.3 到 4.2 的 JSON 与 SKEL 文件，可在支持的版本与格式之间转换，并用官方 Spine WebGL 运行时预览。本地资源不会离开这台设备。画廊模式会从配置好的服务器以只读方式下载资源包，并放进同一个工作区。
 
-## Run it
+## 运行
 
-Use Node.js 20.19 or newer in the Node 20 line, or Node.js 22.12 or newer. You
-also need a browser with WebGL.
+请使用 Node.js 20.19 或同系列的更新版本，或者 Node.js 22.12 及以上。浏览器还需要支持 WebGL。
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. In Canvas mode, choose or drop the complete
-bundle at once:
+打开 Vite 打印出的本地地址。在画布模式下，请一次性选择或拖入完整资源包：
 
-- one JSON or binary skeleton, including Unity names such as `.json.bytes` and `.skel.bytes`
-- one atlas, including `.atlas.txt`
-- each PNG, JPEG, or WebP texture page named by the atlas
+- 一份 JSON 或二进制骨骼，也包括 Unity 风格名称，例如 `.json.bytes`、`.skel.bytes`
+- 一份图集，也包括 `.atlas.txt`
+- 图集中列出的每一张 PNG、JPEG 或 WebP 贴图页
 
-The loader inspects payload structure and byte signatures before it falls back
-to filenames or MIME types. Conversion and media encoding run in dedicated
-workers.
+加载器会先检查文件结构和字节签名，再回退到文件名或 MIME 类型。转换与媒体编码都在专用 Worker 中运行。
 
-GIF export works without WebCodecs. WebM needs VP8 or VP9 support through
-`VideoEncoder`, and MP4 needs H.264 support. The app checks those codecs and
-disables formats the browser cannot encode.
+导出 GIF 不依赖 WebCodecs。导出 WebM 需要通过 `VideoEncoder` 支持 VP8 或 VP9，导出 MP4 需要支持 H.264。应用会检测这些编解码器，并禁用浏览器无法编码的格式。
 
-## Deploy to Vercel
+## 部署到 Vercel
 
-Import the public GitHub repository into Vercel. Use `npm run build` as the build
-command and `dist` as the output directory; Vercel normally detects both from
-the Vite project automatically.
+把公开的 GitHub 仓库导入 Vercel。构建命令使用 `npm run build`，输出目录使用 `dist`；对 Vite 项目，Vercel 通常会自动识别这两项。
 
-The production build generates `robots.txt`, `sitemap.xml`, a canonical URL,
-Open Graph metadata, and structured application data. It resolves the public
-site URL in this order:
+生产构建会生成 `robots.txt`、`sitemap.xml`、规范链接、Open Graph 元数据和结构化应用数据。公开站点地址按以下顺序解析：
 
-1. `SITE_URL`, when explicitly configured;
-2. Vercel's `VERCEL_PROJECT_PRODUCTION_URL` system variable;
-3. `https://spine-thing.vercel.app/` as the local-build fallback.
+1. 显式配置的 `SITE_URL`；
+2. Vercel 系统变量 `VERCEL_PROJECT_PRODUCTION_URL`；
+3. 本地构建回退地址 `https://spine-thing.vercel.app/`。
 
-Enable **Automatically expose System Environment Variables** in the Vercel
-project, or set `SITE_URL` to the full production URL. This is especially
-important when using a custom domain. After deployment, verify `/robots.txt`
-and `/sitemap.xml`, add the site to Google Search Console, and submit the
-sitemap. Search engines decide when and whether to index a site; these files
-make the deployed app crawlable and provide the intended canonical URL.
+请在 Vercel 项目中开启 **Automatically expose System Environment Variables**，或将 `SITE_URL` 设为完整的生产地址。使用自定义域名时尤其重要。部署后请检查 `/robots.txt` 和 `/sitemap.xml`，把站点加入 Google Search Console，并提交站点地图。搜索引擎决定何时、是否收录；这些文件让部署后的应用可被抓取，并提供预期的规范链接。
 
-For GitHub discovery, give the public repository a concise About description,
-set the Vercel deployment as its website, and add relevant topics such as
-`spine`, `spine-animation`, `animation-viewer`, `webgl`, `wasm`, and
-`skeleton-animation`.
+若希望在 GitHub 上更容易被发现，请给公开仓库写一句简洁的 About 描述，把 Vercel 部署地址设为网站，并添加相关主题，例如 `spine`、`spine-animation`、`animation-viewer`、`webgl`、`wasm`、`skeleton-animation`。
 
-## Gallery sources
+## 画廊源
 
-The built-in source list lives in `src/config/gallery-sources.json`. It contains
-ten catalogs by default, including the
-[`langrisser-spiner-db` catalog](https://github.com/OldBernhardt/langrisser-spiner-db).
-Users can add other HTTP or HTTPS manifest URLs in Gallery mode. The browser
-must be able to fetch each manifest and its assets under the host's CORS policy.
+内置源列表在 `src/config/gallery-sources.json`。默认包含十个目录，其中包括 [`langrisser-spiner-db` 目录](https://github.com/OldBernhardt/langrisser-spiner-db)。用户可在画廊模式中添加其他 HTTP 或 HTTPS 清单地址。浏览器必须能在主机的 CORS 策略下拉取每个清单及其资源。
 
-Set `VITE_GALLERY_MANIFEST_URL` during development to replace the first built-in
-manifest URL. Custom sources added through the UI stay in local storage on that
-device.
+开发时设置 `VITE_GALLERY_MANIFEST_URL`，可替换第一个内置清单地址。通过界面添加的自定义源会保存在该设备的本地存储中。
 
-A version 1 manifest may declare `skeleton`, `atlas`, and `textures`, or supply an
-`assets` array for content-based role detection. Relative asset URLs resolve
-against the manifest URL. The app can check declared byte counts and SHA-256
-digests.
+版本 1 清单可以声明 `skeleton`、`atlas` 和 `textures`，也可以提供 `assets` 数组，按内容识别角色。相对资源地址会相对清单地址解析。应用可以校验声明的字节数和 SHA-256 摘要。
 
-TanStack Query cancels abandoned requests and retries network or server failures.
-It caches catalogs and selected bundles. Requests omit credentials. Loader IDs
-resolve through the local registry in `src/services/gallery-client.ts`; a
-manifest cannot load remote code. Register application-owned loaders with
-`registerGalleryBundleLoader`.
+TanStack Query 会取消已放弃的请求，并对网络或服务器失败重试。它会缓存目录和已选资源包。请求不携带凭据。加载器 ID 通过 `src/services/gallery-client.ts` 中的本地注册表解析；清单不能加载远程代码。可用 `registerGalleryBundleLoader` 注册应用自有的加载器。
 
-## Support matrix
+## 支持矩阵
 
-| Capability               | 3.3 | 3.4 | 3.5 | 3.6 | 3.7 | 3.8 | 4.0 | 4.1 | 4.2 |
-| ------------------------ | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| JSON read/write          | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| SKEL read/write          | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Cross-version conversion | yes | yes | yes | yes | yes | yes | yes | yes | yes |
+| 能力         | 3.3 | 3.4 | 3.5 | 3.6 | 3.7 | 3.8 | 4.0 | 4.1 | 4.2 |
+| ------------ | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| JSON 读写    | 是  | 是  | 是  | 是  | 是  | 是  | 是  | 是  | 是  |
+| SKEL 读写    | 是  | 是  | 是  | 是  | 是  | 是  | 是  | 是  | 是  |
+| 跨版本转换   | 是  | 是  | 是  | 是  | 是  | 是  | 是  | 是  | 是  |
 
-The converter detects input versions from file content. Enter a complete
-`major.minor.patch` target because the converter writes that value into the
-output. A downgrade cannot retain data that the older Spine format cannot
-represent, so keep the source file and test the result in its target runtime.
-Conversion downloads contain skeleton data. The app uses the atlas and textures
-for preview without rewriting them.
+转换器会根据文件内容检测输入版本。请填写完整的 `major.minor.patch` 目标版本，因为转换器会把该值写入输出。降级无法保留旧版 Spine 格式表达不了的数据，所以请保留源文件，并在目标运行时中验证结果。转换下载只包含骨骼数据。应用会用图集和贴图做预览，但不会改写它们。
 
-## Implementation
+## 实现说明
 
-- A C++ reader and writer core from `SpineSkeletonDataConverter` compiles to
-  WebAssembly behind an in-memory C API. `native/source.lock.json` records the
-  commit used for the checked-in artifact.
-- The converter creates canonical Spine 4.2 JSON for preview. It creates the
-  requested download in a separate conversion, so preview normalization does not
-  change the downloaded file.
-- Before animation export, the renderer samples each output timestamp and
-  combines the attachment bounds. Automatic sizing keeps the combined aspect
-  ratio, applies the requested padding, and treats width and height as upper
-  limits.
-- The encoding worker caps GIF frame input at 512 MiB and encodes it with
-  modern-gif. Mediabunny writes WebM with VP9 or VP8 and MP4 with H.264 through
-  the browser's `VideoEncoder`.
+- 来自 `SpineSkeletonDataConverter` 的 C++ 读写核心，经内存 C API 编译为 WebAssembly。`native/source.lock.json` 记录了已提交产物所用的 commit。
+- 转换器会生成规范的 Spine 4.2 JSON 供预览。下载请求走另一次独立转换，因此预览归一化不会改动下载文件。
+- 导出动画前，渲染器会采样每个输出时间戳，并合并附件包围盒。自动尺寸会保持合并后的宽高比，应用请求的留白，并把宽高当作上限。
+- 编码 Worker 将 GIF 帧输入限制在 512 MiB，并用 modern-gif 编码。Mediabunny 通过浏览器的 `VideoEncoder` 写出 VP9 或 VP8 的 WebM，以及 H.264 的 MP4。
 
-See [docs/architecture.md](docs/architecture.md) for the data flow and
-[native/README.md](native/README.md) for native build details.
+数据流见 [docs/architecture.md](docs/architecture.md)，原生构建细节见 [native/README.md](native/README.md)。
 
-## Development
+## 开发
 
-Run every required check with:
+运行全部必要检查：
 
 ```sh
 npm run verify
 ```
 
-That command checks formatting, lint rules, unit tests, the production build,
-and Playwright tests. You can run each step on its own:
+该命令会检查格式、lint 规则、单元测试、生产构建和 Playwright 测试。也可以单独运行每一步：
 
 ```sh
 npm run typecheck
@@ -134,45 +83,26 @@ npm run build
 npm run test:e2e
 ```
 
-The project uses TypeScript 7, type-aware Oxlint rules, and Oxfmt. The repository
-tracks the generated converter files, so web development does not require
-Emscripten.
+项目使用 TypeScript 7、具备类型感知的 Oxlint 规则，以及 Oxfmt。仓库会跟踪生成的转换器文件，因此前端开发不需要安装 Emscripten。
 
-Install Emscripten before rebuilding the converter:
+重建转换器前请先安装 Emscripten：
 
 ```sh
 npm run build:converter
 ```
 
-The default build uses the commit in `native/source.lock.json`. It uses a clean,
-matching sibling checkout when one exists and otherwise uses a cached checkout.
-Run `npm run build:converter:update` to resolve the configured ref and update the
-lock after compilation succeeds. `SPINE_CONVERTER_COMMIT` selects an exact commit.
-The update command records that selection in the lock. `SPINE_CONVERTER_SOURCE`
-selects a local checkout without changing the lock, and `EMXX` selects the
-Emscripten C++ compiler.
+默认构建使用 `native/source.lock.json` 中的 commit。若旁边有干净且匹配的同级检出，会优先使用；否则使用缓存检出。运行 `npm run build:converter:update` 可解析配置的 ref，并在编译成功后更新 lock。`SPINE_CONVERTER_COMMIT` 用于指定精确 commit，更新命令会把它记入 lock。`SPINE_CONVERTER_SOURCE` 可指定本地检出且不改 lock，`EMXX` 用于选择 Emscripten C++ 编译器。
 
-The Playwright matrix covers JSON readers, JSON writers, and JSON to SKEL to JSON
-round trips for all nine supported version families. Other browser tests cover
-local upload, gallery loading, WebGL preview, layered clips, PNG capture, and GIF,
-WebM, and supported MP4 downloads. The reference-corpus test checks real JSON and
-SKEL exports when a matching sibling converter checkout is available.
+Playwright 矩阵覆盖全部九个支持版本系列的 JSON 读取、JSON 写入，以及 JSON → SKEL → JSON 往返。其他浏览器测试覆盖本地上传、画廊加载、WebGL 预览、叠加动画、PNG 截取，以及 GIF、WebM 和可用的 MP4 下载。当旁边有匹配的转换器检出时，reference-corpus 测试会检查真实的 JSON 与 SKEL 导出结果。
 
-## Licensing
+## 许可
 
-Spine Thing's original project code is available under the permissive
-[MIT License](LICENSE). That license allows use, modification, distribution,
-sublicensing, and commercial use of the original code.
+Spine Thing 的原创项目代码采用宽松的 [MIT License](LICENSE)。该许可允许对原创代码进行使用、修改、分发、再许可和商业使用。
 
-The MIT license does not relicense third-party components. The complete build
-integrates software with additional downstream conditions:
+MIT 许可不会重新授权第三方组件。完整构建还集成了带有额外下游条件的软件：
 
-- the official Spine runtime has its own license and may require each user to own
-  a Spine Editor license;
-- the converter core and the generated `public/wasm/converter.js` and
-  `public/wasm/converter.wasm` artifacts remain under PolyForm Noncommercial
-  1.0.0, so the complete build is not licensed for unrestricted commercial use;
-- all other third-party packages remain under their respective licenses.
+- 官方 Spine 运行时有自己的许可，可能要求每位用户持有 Spine Editor 许可；
+- 转换器核心以及生成的 `public/wasm/converter.js` 和 `public/wasm/converter.wasm` 产物仍受 PolyForm Noncommercial 1.0.0 约束，因此完整构建不能无限制商用；
+- 其余第三方包仍遵循各自许可。
 
-Read the [third-party notices](THIRD_PARTY_NOTICES.md) and the notice shipped with
-the built app before redistributing the application.
+再分发应用前，请阅读 [第三方声明](THIRD_PARTY_NOTICES.md) 以及随构建产物一起提供的声明。
