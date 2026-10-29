@@ -1100,11 +1100,11 @@ export function App() {
     setStatus("converting");
     setConversionProgress({
       phase: "wasm",
-      percent: 0,
-      detail: "准备转换",
+      percent: 4,
+      detail: "加载转换运行时",
       elapsedMs: 0,
     });
-    setStatusText(`正在转换 ${workspaceDocument.bundle.skeleton.name}…`);
+    setStatusText(`正在转换 ${workspaceDocument.bundle.skeleton.name} · 加载转换运行时 · 4% · 0s`);
     setDownload(null);
     try {
       const version = parseSupportedVersion(conversionSettings.version);

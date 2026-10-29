@@ -44,8 +44,9 @@ type PendingRequest = {
   onProgress?: (progress: ConversionProgress) => void;
   startedAt: number;
   inputBytes: number;
+  phase: ConverterProgressPhase;
   convertStartedAt: number | null;
-  ticker: number | null;
+  ticker: ReturnType<typeof setInterval> | null;
 };
 
 type ConverterRequestWithoutId = Omit<ConversionRequest, "id"> | Omit<DetectionRequest, "id">;
@@ -88,6 +89,13 @@ function convertPercent(elapsedMs: number, inputBytes: number): number {
   const span = 75;
   const ratio = 1 - Math.exp(-elapsedMs / convertTauMs(inputBytes));
   return PHASE_PERCENT.convert + span * ratio;
+}
+
+function warmupPercent(elapsedMs: number, phase: ConverterProgressPhase): number {
+  const base = PHASE_PERCENT[phase];
+  const ceiling = phase === "convert" ? base : PHASE_PERCENT.convert - 1;
+  const ratio = 1 - Math.exp(-elapsedMs / 2_500);
+  return base + (ceiling - base) * ratio;
 }
 
 export class ConverterClient {
@@ -198,27 +206,36 @@ export class ConverterClient {
     }
   }
 
-  #emit(
-    pending: PendingRequest,
-    phase: ConverterProgressPhase | "finalize",
-    percent: number,
-  ): void {
+  #emit(pending: PendingRequest, percent: number): void {
     pending.onProgress?.({
-      phase,
+      phase: pending.phase,
       percent: Math.min(99, Math.max(0, percent)),
-      detail: PHASE_DETAIL[phase],
+      detail: PHASE_DETAIL[pending.phase],
       elapsedMs: Math.max(0, performance.now() - pending.startedAt),
     });
   }
 
-  #startConvertTicker(pending: PendingRequest): void {
+  /** Drives UI even if the worker build is stale and never posts progress events. */
+  #startProgressTicker(pending: PendingRequest): void {
     this.#stopTicker(pending);
-    pending.convertStartedAt = performance.now();
-    pending.ticker = window.setInterval(() => {
-      if (pending.convertStartedAt === null) return;
-      const convertElapsed = performance.now() - pending.convertStartedAt;
-      this.#emit(pending, "convert", convertPercent(convertElapsed, pending.inputBytes));
-    }, 250);
+    this.#emit(pending, PHASE_PERCENT[pending.phase]);
+    pending.ticker = setInterval(() => {
+      if (pending.phase === "convert" && pending.convertStartedAt !== null) {
+        const convertElapsed = performance.now() - pending.convertStartedAt;
+        this.#emit(pending, convertPercent(convertElapsed, pending.inputBytes));
+        return;
+      }
+      const elapsed = performance.now() - pending.startedAt;
+      this.#emit(pending, warmupPercent(elapsed, pending.phase));
+    }, 200);
+  }
+
+  #setPhase(pending: PendingRequest, phase: ConverterProgressPhase): void {
+    pending.phase = phase;
+    if (phase === "convert" && pending.convertStartedAt === null) {
+      pending.convertStartedAt = performance.now();
+    }
+    this.#emit(pending, PHASE_PERCENT[phase]);
   }
 
   #request(
@@ -238,13 +255,16 @@ export class ConverterClient {
         onProgress,
         startedAt: performance.now(),
         inputBytes,
+        phase: "wasm",
         convertStartedAt: null,
         ticker: null,
       };
       this.#pending.set(id, pending);
+      if (onProgress) this.#startProgressTicker(pending);
       try {
         this.#worker.postMessage(message, [message.input]);
       } catch (error) {
+        this.#stopTicker(pending);
         this.#pending.delete(id);
         reject(error instanceof Error ? error : new Error(String(error)));
       }
@@ -257,9 +277,7 @@ export class ConverterClient {
     if (!pending) return;
 
     if (response.type === "progress") {
-      if (response.phase === "convert") this.#startConvertTicker(pending);
-      else this.#stopTicker(pending);
-      this.#emit(pending, response.phase, PHASE_PERCENT[response.phase]);
+      this.#setPhase(pending, response.phase);
       return;
     }
 
@@ -281,4 +299,4 @@ export class ConverterClient {
     }
     this.#pending.clear();
   };
-}
+};
