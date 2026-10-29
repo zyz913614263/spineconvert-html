@@ -113,12 +113,19 @@ function detect(module: ConverterModule, input: ArrayBuffer): string {
   });
 }
 
+function postProgress(id: number, phase: "wasm" | "detect" | "convert"): void {
+  const response: ConverterResponse = { type: "progress", id, phase };
+  workerScope.postMessage(response);
+}
+
 workerScope.addEventListener("message", (event: MessageEvent<ConverterRequest>) => {
   detached(
     (async () => {
       const request = event.data;
       try {
+        postProgress(request.id, "wasm");
         const module = await loadModule();
+        postProgress(request.id, "detect");
         const detected = detect(module, request.input);
         if (!isSupportedVersion(detected)) {
           throw new Error(`Unsupported Spine version: ${detected}`);
@@ -134,6 +141,7 @@ workerScope.addEventListener("message", (event: MessageEvent<ConverterRequest>) 
           return;
         }
 
+        postProgress(request.id, "convert");
         const data = withBytes(module, request.input, (inputPointer) =>
           withCString(module, request.outputVersion, (versionPointer) => {
             const status = module._st_convert(

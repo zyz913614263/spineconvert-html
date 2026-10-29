@@ -34,13 +34,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import type { SkeletonFormat, SpineAssetBundle } from "@/domain/spine/assets";
 import { isSupportedVersion, type SpineVersionFamily } from "@/domain/spine/version";
 import type { PremultipliedAlphaMode } from "@/render/spine-renderer";
+import { formatElapsed } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { ConversionProgress } from "@/services/converter-client";
 
 import { IconButton } from "./icon-button";
 
@@ -93,6 +96,7 @@ type ProjectPanelProps = {
   busy: boolean;
   loading: boolean;
   converting: boolean;
+  conversionProgress: ConversionProgress | null;
   download: ConversionDownload | null;
   premultipliedAlpha: PremultipliedAlphaMode;
   atlasPremultipliedAlpha: boolean;
@@ -115,6 +119,7 @@ export const ProjectPanel = memo(function ProjectPanel({
   busy,
   loading,
   converting,
+  conversionProgress,
   download,
   premultipliedAlpha,
   atlasPremultipliedAlpha,
@@ -422,6 +427,19 @@ export const ProjectPanel = memo(function ProjectPanel({
                       )}
                       {converting ? "转换中…" : "转换资源包"}
                     </Button>
+
+                    {conversionProgress ? (
+                      <Progress
+                        value={Math.round(conversionProgress.percent)}
+                        className="gap-2"
+                        aria-label="转换进度"
+                      >
+                        <ProgressLabel className="text-2xs text-muted-foreground">
+                          {conversionProgress.detail} · {formatElapsed(conversionProgress.elapsedMs)}
+                        </ProgressLabel>
+                        <ProgressValue className="font-mono text-2xs" />
+                      </Progress>
+                    ) : null}
 
                     {download ? (
                       <Button className="w-full" variant="secondary" onClick={onDownload}>

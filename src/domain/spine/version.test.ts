@@ -5,6 +5,7 @@ import {
   SUPPORTED_VERSION_FAMILIES,
   isSupportedVersion,
   parseSupportedVersion,
+  peekJsonSpineVersion,
   versionFamily,
 } from "./version";
 
@@ -32,5 +33,11 @@ describe("Spine versions", () => {
     expect(() => parseSupportedVersion("4.2")).toThrow(/complete Spine version/);
     expect(() => parseSupportedVersion("4.3.0")).toThrow(/3\.3\.x through 4\.2\.x/);
     expect(() => parseSupportedVersion("3.2.99")).toThrow(/3\.3\.x through 4\.2\.x/);
+  });
+
+  it("peeks skeleton.spine from JSON headers", () => {
+    const bytes = new TextEncoder().encode('{"skeleton":{"hash":"x","spine":"4.2.43"},"bones":[]}');
+    expect(peekJsonSpineVersion(bytes)).toBe("4.2.43");
+    expect(peekJsonSpineVersion(new TextEncoder().encode("{}"))).toBeNull();
   });
 });

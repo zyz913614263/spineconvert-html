@@ -38,4 +38,17 @@ export type ConverterErrorResponse = {
   message: string;
 };
 
-export type ConverterResponse = ConversionResponse | DetectionResponse | ConverterErrorResponse;
+/** Coarse phases; native `st_convert` itself cannot report finer progress. */
+export type ConverterProgressPhase = "wasm" | "detect" | "convert";
+
+export type ConverterProgressResponse = {
+  type: "progress";
+  id: number;
+  phase: ConverterProgressPhase;
+};
+
+export type ConverterResponse =
+  | ConversionResponse
+  | DetectionResponse
+  | ConverterErrorResponse
+  | ConverterProgressResponse;

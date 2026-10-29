@@ -52,7 +52,12 @@ import {
 } from "@/render/spine-renderer";
 import type { SpineRenderer } from "@/render/spine-renderer";
 import type { AnimationExporter } from "@/services/animation-exporter";
-import { ConverterClient, type ConversionResult } from "@/services/converter-client";
+import {
+  ConverterClient,
+  type ConversionProgress,
+  type ConversionResult,
+} from "@/services/converter-client";
+import { formatElapsed } from "@/lib/format";
 import { detectExportCapabilities, type ExportCapabilities } from "@/services/export-capabilities";
 
 import { AppHeader, type WorkspaceMode } from "./components/app-header";
@@ -281,6 +286,7 @@ export function App() {
   const [spineZipExporting, setSpineZipExporting] = useState(false);
   const [status, setStatus] = useState<WorkStatus>("idle");
   const [statusText, setStatusText] = useState(IDLE_STATUS);
+  const [conversionProgress, setConversionProgress] = useState<ConversionProgress | null>(null);
   const [renderState, setRenderState] = useState<RenderState>(INITIAL_RENDER_STATE);
   const [animations, setAnimations] = useState<readonly AnimationInfo[]>([]);
   const [skins, setSkins] = useState<readonly string[]>([]);
@@ -597,20 +603,32 @@ export function App() {
       }
 
       pendingFilesRef.current = null;
-      setStatusText("正在校验资源包并准备 Spine 4.2 预览…");
+      setStatusText("正在校验资源包…");
 
       try {
         const bundle = await createAssetBundle(selectedFiles);
         const bytes = new Uint8Array(await bundle.skeleton.arrayBuffer());
 
-        const preview = await converter.convert({
-          input: bytes,
-          inputFormat: bundle.skeletonFormat,
-          outputFormat: "json",
-          outputVersion: DEFAULT_TARGETS["4.2"],
-        });
+        setStatusText(
+          bundle.skeletonFormat === "json"
+            ? "正在准备预览…"
+            : "正在转换到 Spine 4.2 预览（二进制较大时可能需要一会儿）…",
+        );
+        const preview = await converter.preparePreviewJson(
+          bytes,
+          bundle.skeletonFormat,
+          (progress) => {
+            if (loadSequenceRef.current !== operation) return;
+            setConversionProgress(progress);
+            setStatusText(
+              `正在转换预览 · ${progress.detail} · ${Math.round(progress.percent)}% · ${formatElapsed(progress.elapsedMs)}`,
+            );
+          },
+        );
         if (loadSequenceRef.current !== operation) return;
+        setConversionProgress(null);
 
+        setStatusText("正在加载贴图并渲染预览…");
         const previewJson = new TextDecoder("utf-8", { fatal: true }).decode(preview.data);
         await renderer.load(previewJson, bundle);
         if (loadSequenceRef.current !== operation) return;
@@ -641,6 +659,7 @@ export function App() {
         );
       } catch (error) {
         if (loadSequenceRef.current !== operation) return;
+        setConversionProgress(null);
         setStatus("error");
         setStatusText(
           error instanceof Error
@@ -796,13 +815,19 @@ export function App() {
           if (!converter || !renderer) {
             throw new Error("本机运行时仍在启动，请重试。");
           }
-          const preview = await converter.convert({
-            input: loaded.bytes,
-            inputFormat: loaded.bundle.skeletonFormat,
-            outputFormat: "json",
-            outputVersion: DEFAULT_TARGETS["4.2"],
-          });
+          const preview = await converter.preparePreviewJson(
+            loaded.bytes,
+            loaded.bundle.skeletonFormat,
+            (progress) => {
+              if (canceled || loadSequenceRef.current !== operation) return;
+              setConversionProgress(progress);
+              setStatusText(
+                `正在转换预览 · ${progress.detail} · ${Math.round(progress.percent)}% · ${formatElapsed(progress.elapsedMs)}`,
+              );
+            },
+          );
           if (canceled || loadSequenceRef.current !== operation) return;
+          setConversionProgress(null);
 
           const previewJson = new TextDecoder("utf-8", { fatal: true }).decode(preview.data);
           const prepared = await prepareGalleryPreview({
@@ -890,6 +915,7 @@ export function App() {
             message: `无法打开「${item.title}」。资源包可能不完整，或与 Spine 4.2 预览运行时不兼容。当前文档未改动。`,
             detail,
           });
+          setConversionProgress(null);
           setStatus("error");
           setStatusText(`无法打开 ${item.title}。当前文档未改动。`);
         }
@@ -1057,12 +1083,28 @@ export function App() {
     setDownload(null);
   }, []);
 
+  const reportConversionProgress = useCallback(
+    (name: string, progress: ConversionProgress) => {
+      setConversionProgress(progress);
+      setStatusText(
+        `正在转换 ${name} · ${progress.detail} · ${Math.round(progress.percent)}% · ${formatElapsed(progress.elapsedMs)}`,
+      );
+    },
+    [],
+  );
+
   const convert = useCallback(async () => {
     const workspaceDocument = activeDocumentRef.current;
     const converter = converterRef.current;
     if (!workspaceDocument || !converter) return;
     setStatus("converting");
-    setStatusText(`正在本机工作线程中转换 ${workspaceDocument.bundle.skeleton.name}…`);
+    setConversionProgress({
+      phase: "wasm",
+      percent: 0,
+      detail: "准备转换",
+      elapsedMs: 0,
+    });
+    setStatusText(`正在转换 ${workspaceDocument.bundle.skeleton.name}…`);
     setDownload(null);
     try {
       const version = parseSupportedVersion(conversionSettings.version);
@@ -1072,6 +1114,8 @@ export function App() {
         outputFormat: conversionSettings.format,
         outputVersion: version,
         removeCurves: conversionSettings.removeCurves,
+        onProgress: (progress) =>
+          reportConversionProgress(workspaceDocument.bundle.skeleton.name, progress),
       });
       const filename = `${basename(workspaceDocument.bundle.skeleton.name)}-spine-${version}.${conversionSettings.format}`;
       setDownload({
@@ -1081,15 +1125,17 @@ export function App() {
         format: conversionSettings.format,
         version,
       });
+      setConversionProgress(null);
       setStatus("ready");
       setStatusText(
         `已转换 ${result.inputVersion} → ${version}（${conversionSettings.format.toUpperCase()}）。可在工程面板中保存。`,
       );
     } catch (error) {
+      setConversionProgress(null);
       setStatus("error");
       setStatusText(errorMessage(error));
     }
-  }, [conversionSettings]);
+  }, [conversionSettings, reportConversionProgress]);
 
   const runConvert = useCallback(() => detached(convert(), "convert.run"), [convert]);
 
@@ -1863,6 +1909,7 @@ export function App() {
     busy,
     loading: status === "loading",
     converting: status === "converting",
+    conversionProgress,
     download: download?.documentId === activeId ? download : null,
     premultipliedAlpha: activeDocument?.premultipliedAlpha ?? "auto",
     atlasPremultipliedAlpha,

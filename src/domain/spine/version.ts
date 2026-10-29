@@ -27,9 +27,18 @@ export const DEFAULT_TARGETS = {
 } satisfies Readonly<Record<SpineVersionFamily, SpineVersion>>;
 
 const COMPLETE_VERSION = /^(3\.[3-8]|4\.[0-2])\.(\d+)$/;
+const JSON_SPINE_VERSION = /"spine"\s*:\s*"(3\.[3-8]\.\d+|4\.[0-2]\.\d+)"/;
 
 export function isSupportedVersion(value: string): value is SpineVersion {
   return COMPLETE_VERSION.test(value);
+}
+
+/** Reads `skeleton.spine` from the start of a Spine JSON payload without a full parse. */
+export function peekJsonSpineVersion(bytes: Uint8Array): SpineVersion | null {
+  const head = new TextDecoder("utf-8").decode(bytes.subarray(0, Math.min(bytes.byteLength, 4096)));
+  const match = JSON_SPINE_VERSION.exec(head);
+  const version = match?.[1];
+  return version && isSupportedVersion(version) ? version : null;
 }
 
 export function versionFamily(value: SpineVersion): SpineVersionFamily {
