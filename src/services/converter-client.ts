@@ -17,13 +17,6 @@ import {
   type SpineVersion,
 } from "../domain/spine/version";
 
-const PHASE_PERCENT: Record<ConverterProgressPhase | "finalize", number> = {
-  wasm: 4,
-  detect: 12,
-  convert: 20,
-  finalize: 96,
-};
-
 const PHASE_DETAIL: Record<ConverterProgressPhase | "finalize", string> = {
   wasm: "加载转换运行时",
   detect: "识别骨骼版本",
@@ -45,7 +38,6 @@ type PendingRequest = {
   startedAt: number;
   inputBytes: number;
   phase: ConverterProgressPhase;
-  convertStartedAt: number | null;
   ticker: ReturnType<typeof setInterval> | null;
 };
 
@@ -80,22 +72,25 @@ export type ConversionResult = {
   data: Uint8Array;
 };
 
+/** Expected wall time for native convert; larger inputs take longer. */
 function convertTauMs(inputBytes: number): number {
-  // Larger skeletons spend longer inside the blocking native convert call.
-  return Math.min(90_000, Math.max(6_000, inputBytes / 40));
+  return Math.min(120_000, Math.max(8_000, inputBytes / 30));
 }
 
-function convertPercent(elapsedMs: number, inputBytes: number): number {
-  const span = 75;
+/**
+ * Single elapsed-time curve for the whole wait. Native convert cannot report real
+ * percentages, so this keeps moving until completion instead of capping on a phase.
+ */
+function overallPercent(elapsedMs: number, inputBytes: number): number {
   const ratio = 1 - Math.exp(-elapsedMs / convertTauMs(inputBytes));
-  return PHASE_PERCENT.convert + span * ratio;
+  return 3 + 92 * ratio;
 }
 
-function warmupPercent(elapsedMs: number, phase: ConverterProgressPhase): number {
-  const base = PHASE_PERCENT[phase];
-  const ceiling = phase === "convert" ? base : PHASE_PERCENT.convert - 1;
-  const ratio = 1 - Math.exp(-elapsedMs / 2_500);
-  return base + (ceiling - base) * ratio;
+function inferredPhase(elapsedMs: number, reported: ConverterProgressPhase): ConverterProgressPhase {
+  if (reported === "convert") return "convert";
+  // Worker progress may be missing after HMR; after a short warmup assume convert.
+  if (elapsedMs >= 3_000) return "convert";
+  return reported;
 }
 
 export class ConverterClient {
@@ -149,7 +144,7 @@ export class ConverterClient {
     if (response.type !== "converted")
       throw new Error("Converter returned an unexpected response.");
 
-    emitFinalize(PHASE_PERCENT.finalize);
+    emitFinalize(96);
 
     let data = new Uint8Array(response.data);
     // Spine Editor requires mesh `triangles` even when empty; the native converter may omit them.
@@ -206,36 +201,21 @@ export class ConverterClient {
     }
   }
 
-  #emit(pending: PendingRequest, percent: number): void {
+  #emit(pending: PendingRequest): void {
+    const elapsedMs = Math.max(0, performance.now() - pending.startedAt);
+    const phase = inferredPhase(elapsedMs, pending.phase);
     pending.onProgress?.({
-      phase: pending.phase,
-      percent: Math.min(99, Math.max(0, percent)),
-      detail: PHASE_DETAIL[pending.phase],
-      elapsedMs: Math.max(0, performance.now() - pending.startedAt),
+      phase,
+      percent: Math.min(95, overallPercent(elapsedMs, pending.inputBytes)),
+      detail: PHASE_DETAIL[phase],
+      elapsedMs,
     });
   }
 
-  /** Drives UI even if the worker build is stale and never posts progress events. */
   #startProgressTicker(pending: PendingRequest): void {
     this.#stopTicker(pending);
-    this.#emit(pending, PHASE_PERCENT[pending.phase]);
-    pending.ticker = setInterval(() => {
-      if (pending.phase === "convert" && pending.convertStartedAt !== null) {
-        const convertElapsed = performance.now() - pending.convertStartedAt;
-        this.#emit(pending, convertPercent(convertElapsed, pending.inputBytes));
-        return;
-      }
-      const elapsed = performance.now() - pending.startedAt;
-      this.#emit(pending, warmupPercent(elapsed, pending.phase));
-    }, 200);
-  }
-
-  #setPhase(pending: PendingRequest, phase: ConverterProgressPhase): void {
-    pending.phase = phase;
-    if (phase === "convert" && pending.convertStartedAt === null) {
-      pending.convertStartedAt = performance.now();
-    }
-    this.#emit(pending, PHASE_PERCENT[phase]);
+    this.#emit(pending);
+    pending.ticker = setInterval(() => this.#emit(pending), 200);
   }
 
   #request(
@@ -256,7 +236,6 @@ export class ConverterClient {
         startedAt: performance.now(),
         inputBytes,
         phase: "wasm",
-        convertStartedAt: null,
         ticker: null,
       };
       this.#pending.set(id, pending);
@@ -277,7 +256,8 @@ export class ConverterClient {
     if (!pending) return;
 
     if (response.type === "progress") {
-      this.#setPhase(pending, response.phase);
+      pending.phase = response.phase;
+      this.#emit(pending);
       return;
     }
 
