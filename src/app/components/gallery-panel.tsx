@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
+  ArrowDownToLine,
   Check,
   ChevronDown,
   Cloud,
@@ -71,6 +72,10 @@ type GalleryPanelProps = {
   fetching: boolean;
   error: string | null;
   preparationError: { title: string; message: string; detail: string } | null;
+  /** True when the selected gallery item is loaded and ready to export. */
+  canExportSpine: boolean;
+  exportingSpine: boolean;
+  onExportSpine: () => void;
   onSelect: (item: GalleryItem) => void;
   onSelectSource: (id: string) => void;
   onRemoveSource: (id: string) => void;
@@ -141,6 +146,9 @@ export const GalleryPanel = memo(function GalleryPanel({
   fetching,
   error,
   preparationError,
+  canExportSpine,
+  exportingSpine,
+  onExportSpine,
   onSelect,
   onSelectSource,
   onRemoveSource,
@@ -372,10 +380,24 @@ export const GalleryPanel = memo(function GalleryPanel({
         </p>
       ) : null}
 
-      <footer className="shrink-0 border-t border-border-soft px-3 py-2">
+      <footer className="flex shrink-0 flex-col gap-2 border-t border-border-soft px-3 py-2">
+        <Button
+          className="w-full"
+          disabled={!canExportSpine || exportingSpine}
+          onClick={onExportSpine}
+        >
+          {exportingSpine ? (
+            <Spinner data-icon="inline-start" />
+          ) : (
+            <ArrowDownToLine data-icon="inline-start" />
+          )}
+          {exportingSpine ? "导出中…" : "导出为 Spine"}
+        </Button>
         <p className="flex items-start gap-2 text-2xs leading-relaxed text-muted-foreground">
           <Cloud className="mt-0.5 size-icon-sm shrink-0 text-cyan" aria-hidden="true" />
-          画廊资源包以只读方式下载。本地文件仍留在这台设备上。
+          {canExportSpine
+            ? "将当前条目的骨骼、图集和贴图打成 ZIP 下载到本机。"
+            : "选中并加载条目后即可导出。资源包以只读方式下载。"}
         </p>
       </footer>
     </section>

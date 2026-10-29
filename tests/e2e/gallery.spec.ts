@@ -1,4 +1,12 @@
-import { expect, test, type Page } from "@playwright/test";
+import { readFile } from "node:fs/promises";
+
+import { expect, test, type Download, type Page } from "@playwright/test";
+
+async function downloadBytes(download: Download): Promise<Buffer> {
+  const path = await download.path();
+  if (!path) throw new Error("Browser download did not produce a local file.");
+  return readFile(path);
+}
 
 const SKELETON = JSON.stringify({
   skeleton: { spine: "4.2.11", x: -16, y: -16, width: 32, height: 32 },
@@ -144,6 +152,16 @@ test("loads a Langrisser compound-suffix bundle and reuses it across modes", asy
   await expect(galleryOption).toHaveAttribute("aria-selected", "true");
   expect(assetRequests).toHaveLength(3);
 
+  const exportButton = page.getByRole("button", { name: "导出为 Spine" });
+  await expect(exportButton).toBeEnabled();
+  const spineDownload = page.waitForEvent("download");
+  await exportButton.click();
+  const downloaded = await spineDownload;
+  expect(downloaded.suggestedFilename()).toBe("Adankelmo.zip");
+  const zipBytes = await downloadBytes(downloaded);
+  expect(zipBytes.subarray(0, 2).toString("utf8")).toBe("PK");
+  await expect(page.locator(".status-strip")).toContainText("已导出 Adankelmo.zip");
+
   await page.getByRole("tab", { name: "画布模式" }).click();
   await page.getByRole("tab", { name: "画廊模式" }).click();
   await galleryOption.click();
@@ -159,7 +177,7 @@ test("applies the built-in Daiblos Core alpha default", async ({ page }) => {
   await page.getByRole("tab", { name: "画廊模式" }).click();
   const sourcePicker = page.getByRole("combobox", { name: /画廊库/ });
   await sourcePicker.click();
-  await page.getByRole("option", { name: /^Daiblos Core/ }).click();
+  await page.getByRole("option", { name: /^Daiblos 核心/ }).click();
 
   const galleryOption = page.getByRole("option", { name: /Adankelmo Adankelmo · Characters/ });
   await galleryOption.click();
@@ -441,7 +459,7 @@ test("adds, switches to, and removes a second library", async ({ page }) => {
   await page.getByRole("tab", { name: "画廊模式" }).click();
 
   const picker = page.getByRole("combobox", { name: /画廊库/ });
-  await expect(picker).toContainText("Langrisser");
+  await expect(picker).toContainText("梦幻模拟战");
 
   await picker.click();
   await page.getByRole("button", { name: "添加清单地址" }).click();
@@ -464,13 +482,13 @@ test("adds, switches to, and removes a second library", async ({ page }) => {
   await search.fill("Hero");
 
   await picker.click();
-  await page.getByRole("option", { name: /^Langrisser/ }).click();
-  await expect(picker).toContainText("Langrisser");
+  await page.getByRole("option", { name: /^梦幻模拟战/ }).click();
+  await expect(picker).toContainText("梦幻模拟战");
   await expect(search).toHaveValue("");
   await expect(page.getByRole("option", { name: /Adankelmo/ })).toBeVisible();
 
   await picker.click();
-  const libraryOptions = page.getByRole("option", { name: /^(Langrisser|Studio Rigs)/ });
+  const libraryOptions = page.getByRole("option", { name: /^(梦幻模拟战|Studio Rigs)/ });
   await expect(libraryOptions).toHaveCount(2);
   await page.getByRole("button", { name: "移除 Studio Rigs" }).click();
   await expect(libraryOptions).toHaveCount(1);

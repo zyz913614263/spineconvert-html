@@ -44,6 +44,7 @@ import {
 import { detached } from "@/lib/detached";
 import { readDesignToken } from "@/lib/tokens";
 import { errorMessage } from "@/lib/utils";
+import { spineBundleZipFilename, zipSpineAssetBundle } from "@/services/spine-bundle-zip";
 import {
   type AnimationInfo,
   type PremultipliedAlphaMode,
@@ -277,6 +278,7 @@ export function App() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [customFrames, setCustomFrames] = useState<Readonly<Record<string, Bounds>>>({});
   const [download, setDownload] = useState<ConvertedDownload | null>(null);
+  const [spineZipExporting, setSpineZipExporting] = useState(false);
   const [status, setStatus] = useState<WorkStatus>("idle");
   const [statusText, setStatusText] = useState(IDLE_STATUS);
   const [renderState, setRenderState] = useState<RenderState>(INITIAL_RENDER_STATE);
@@ -1097,6 +1099,44 @@ export function App() {
     downloadBlob(asBlob(download.data, mime), download.filename);
   }, [activeId, download]);
 
+  /** Packs the loaded gallery bundle into one zip and downloads it. */
+  const exportGalleryAsSpine = useCallback(async () => {
+    const workspaceDocument = activeDocumentRef.current;
+    if (
+      !workspaceDocument ||
+      workspaceDocument.origin.kind !== "gallery" ||
+      busy ||
+      spineZipExporting
+    ) {
+      return;
+    }
+
+    setSpineZipExporting(true);
+    setStatusText(`正在打包 ${workspaceDocument.displayName} 的 Spine 资源…`);
+    try {
+      const zipped = await zipSpineAssetBundle(workspaceDocument.bundle);
+      const filename = spineBundleZipFilename(
+        workspaceDocument.bundle.skeleton.name,
+        workspaceDocument.displayName,
+      );
+      downloadBlob(asBlob(zipped, "application/zip"), filename);
+      setStatus("ready");
+      setStatusText(
+        `已导出 ${filename} · 骨骼、图集与 ${workspaceDocument.bundle.pageNames.length} 张贴图。`,
+      );
+    } catch (error) {
+      setStatus("error");
+      setStatusText(errorMessage(error));
+    } finally {
+      setSpineZipExporting(false);
+    }
+  }, [busy, spineZipExporting]);
+
+  const runExportGalleryAsSpine = useCallback(
+    () => detached(exportGalleryAsSpine(), "gallery.export-spine-zip"),
+    [exportGalleryAsSpine],
+  );
+
   const selectAnimation = useCallback((name: string) => {
     const workspaceDocument = activeDocumentRef.current;
     if (!workspaceDocument || !name) return;
@@ -1802,6 +1842,10 @@ export function App() {
     fetching: galleryCatalogQuery.isFetching || galleryBundleQuery.isFetching,
     error: galleryCatalogQuery.error instanceof Error ? galleryCatalogQuery.error.message : null,
     preparationError: galleryPreparationError,
+    canExportSpine:
+      selectedGalleryId !== null && pendingGalleryId === null && !busy && !spineZipExporting,
+    exportingSpine: spineZipExporting,
+    onExportSpine: runExportGalleryAsSpine,
     onSelect: selectGalleryItem,
     onSelectSource: changeGallerySource,
     onRemoveSource: removeGallerySource,
