@@ -7,6 +7,7 @@ import type {
   DetectionResponse,
 } from "../domain/conversion/protocol";
 import type { SkeletonFormat } from "../domain/spine/assets";
+import { ensureMeshTrianglesInSkeletonJson } from "../domain/spine/skeleton-json";
 import type { SpineVersion } from "../domain/spine/version";
 
 type PendingRequest = {
@@ -80,7 +81,10 @@ export class ConverterClient {
     });
     if (response.type !== "converted")
       throw new Error("Converter returned an unexpected response.");
-    return { inputVersion: response.inputVersion, data: new Uint8Array(response.data) };
+    let data = new Uint8Array(response.data);
+    // Spine Editor requires mesh `triangles` even when empty; the native converter may omit them.
+    if (options.outputFormat === "json") data = ensureMeshTrianglesInSkeletonJson(data);
+    return { inputVersion: response.inputVersion, data };
   }
 
   dispose(): void {

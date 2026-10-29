@@ -1,6 +1,7 @@
 import {
   AtlasAttachmentLoader,
   GLTexture,
+  MeshAttachment,
   MixBlend,
   MixDirection,
   Physics,
@@ -87,6 +88,18 @@ function flipRowsInPlace(source: Uint8Array, width: number, height: number): voi
     temporaryRow.set(source.subarray(topOffset, topOffset + rowSize));
     source.copyWithin(topOffset, bottomOffset, bottomOffset + rowSize);
     source.set(temporaryRow, bottomOffset);
+  }
+}
+
+/** Converter/export paths may omit empty mesh triangle arrays; Spine WebGL then crashes in PolygonBatcher. */
+function repairMeshTriangles(skeleton: Skeleton): void {
+  for (const skin of skeleton.data.skins) {
+    for (const entry of skin.getAttachments()) {
+      const attachment = entry.attachment;
+      if (attachment instanceof MeshAttachment && !attachment.triangles) {
+        attachment.triangles = [];
+      }
+    }
   }
 }
 
@@ -240,6 +253,7 @@ export class SpineRenderer {
       const parser = new SkeletonJson(attachmentLoader);
       const skeletonData = parser.readSkeletonData(json);
       const skeleton = new Skeleton(skeletonData);
+      repairMeshTriangles(skeleton);
       skeleton.setToSetupPose();
       skeleton.updateWorldTransform(Physics.reset);
       if (operation !== this.#loadSequence) {
